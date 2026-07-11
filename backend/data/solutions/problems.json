@@ -1,0 +1,146 @@
+[
+  {
+    "title": "Two Sum",
+    "source": "LeetCode 1",
+    "difficulty": "easy",
+    "tags": ["hash map", "array"],
+    "editorial": "Dla każdego elementu x szukamy, czy widzieliśmy już target - x. Naiwne O(N^2) sprawdza wszystkie pary. Optymalnie: idąc od lewej trzymamy hash mapę wartość -> indeks; dla bieżącego x sprawdzamy, czy target - x jest w mapie, a dopiero potem dodajemy x. Ta kolejność (najpierw sprawdź, potem dodaj) automatycznie zabrania użycia tego samego elementu dwa razy. Złożoność O(N) czasu, O(N) pamięci. Pułapki: duplikaty w tablicy (mapa nadpisuje indeks — dlatego sprawdzaj przed wstawieniem), zadanie gwarantuje dokładnie jedno rozwiązanie.",
+    "code": "def two_sum(nums: list[int], target: int) -> list[int]:\n    seen: dict[int, int] = {}\n    for i, x in enumerate(nums):\n        # najpierw sprawdzamy dopelnienie, potem wstawiamy — unika uzycia elementu dwukrotnie\n        if target - x in seen:\n            return [seen[target - x], i]\n        seen[x] = i\n    return []",
+    "code_language": "python"
+  },
+  {
+    "title": "Trapping Rain Water",
+    "source": "LeetCode 42",
+    "difficulty": "hard",
+    "tags": ["two pointers", "stack", "array"],
+    "editorial": "Woda nad słupkiem i to min(max_z_lewej, max_z_prawej) - height[i]. Podejście z prefiksowymi maksimami wymaga O(N) pamięci. Optymalnie dwa wskaźniki: trzymamy left_max i right_max; przetwarzamy stronę z NIŻSZYM maksimum, bo to ono ogranicza poziom wody — wtedy druga strona na pewno nie jest gorsza i wynik dla bieżącego słupka jest ostateczny. O(N) czasu, O(1) pamięci. Pułapki: przetworzenie strony z wyższym maksimum daje błędny wynik; aktualizuj maksimum przed liczeniem wody.",
+    "code": "def trap(height: list[int]) -> int:\n    l, r = 0, len(height) - 1\n    left_max = right_max = 0\n    water = 0\n    while l < r:\n        # przetwarzamy strone z NIZSZYM maksimum — to ono ogranicza poziom wody\n        if height[l] < height[r]:\n            left_max = max(left_max, height[l])\n            water += left_max - height[l]\n            l += 1\n        else:\n            right_max = max(right_max, height[r])\n            water += right_max - height[r]\n            r -= 1\n    return water",
+    "code_language": "python"
+  },
+  {
+    "title": "Longest Substring Without Repeating Characters",
+    "source": "LeetCode 3",
+    "difficulty": "medium",
+    "tags": ["sliding window", "hash map", "string"],
+    "editorial": "Okno przesuwne z niezmiennikiem 'brak powtórzeń w oknie'. Rozszerzamy prawy koniec; gdy znak się powtarza, przesuwamy lewy koniec za poprzednie wystąpienie. Wersja z mapą znak -> ostatni indeks pozwala skakać lewym wskaźnikiem od razu (zamiast krok po kroku). Wynik aktualizujemy po przywróceniu niezmiennika. O(N) czasu. Pułapki: lewy wskaźnik może się tylko zwiększać — left = max(left, last[c] + 1), inaczej cofnięcie psuje wynik; aktualizacja wyniku przed naprawą okna zawyża odpowiedź.",
+    "code": "def length_of_longest_substring(s: str) -> int:\n    last: dict[str, int] = {}\n    best = 0\n    left = 0\n    for right, c in enumerate(s):\n        if c in last and last[c] >= left:\n            left = last[c] + 1  # skok za poprzednie wystapienie\n        last[c] = right\n        best = max(best, right - left + 1)\n    return best",
+    "code_language": "python"
+  },
+  {
+    "title": "Edit Distance",
+    "source": "LeetCode 72",
+    "difficulty": "medium",
+    "tags": ["dynamic programming", "string"],
+    "editorial": "Klasyczne DP 2D: dp[i][j] = minimalna liczba operacji zamiany word1[:i] w word2[:j]. Przejście: jeśli znaki równe — dp[i-1][j-1]; inaczej 1 + min(wstawienie dp[i][j-1], usunięcie dp[i-1][j], zamiana dp[i-1][j-1]). Bazowe: dp[i][0] = i, dp[0][j] = j. O(N*M) czasu; pamięć redukowalna do O(min(N,M)) trzymając jeden wiersz. Pułapki: off-by-one między indeksem znaku a indeksem prefiksu (dp[i][j] dotyczy prefiksów długości i, j — znak to word[i-1]), pomylenie kierunków wstawienia/usunięcia.",
+    "code": "def min_distance(word1: str, word2: str) -> int:\n    n, m = len(word1), len(word2)\n    dp = list(range(m + 1))  # dp[0][j] = j\n    for i in range(1, n + 1):\n        prev_diag = dp[0]\n        dp[0] = i\n        for j in range(1, m + 1):\n            cur = dp[j]\n            if word1[i - 1] == word2[j - 1]:\n                dp[j] = prev_diag\n            else:\n                dp[j] = 1 + min(prev_diag, dp[j], dp[j - 1])\n            prev_diag = cur\n    return dp[m]",
+    "code_language": "python"
+  },
+  {
+    "title": "Subarray Sum Equals K",
+    "source": "LeetCode 560",
+    "difficulty": "medium",
+    "tags": ["prefix sum", "hash map", "array"],
+    "editorial": "Sliding window NIE działa — tablica zawiera liczby ujemne, więc suma okna nie jest monotoniczna. Poprawne podejście: sumy prefiksowe + hash mapa liczności. Suma podciągu (j, i] = pre[i] - pre[j] = k, więc dla każdego i dodajemy do wyniku liczność pre[i] - k wśród wcześniejszych prefiksów. O(N). Pułapki: obowiązkowa inicjalizacja mapy {0: 1} (podciągi od początku tablicy), dodawanie bieżącego prefiksu do mapy PO sprawdzeniu (inaczej podciąg pusty zaliczony przy k = 0).",
+    "code": "def subarray_sum(nums: list[int], k: int) -> int:\n    from collections import defaultdict\n    count: defaultdict[int, int] = defaultdict(int)\n    count[0] = 1  # pusty prefiks\n    total = 0\n    prefix = 0\n    for x in nums:\n        prefix += x\n        total += count[prefix - k]\n        count[prefix] += 1\n    return total",
+    "code_language": "python"
+  },
+  {
+    "title": "Koko Eating Bananas",
+    "source": "LeetCode 875",
+    "difficulty": "medium",
+    "tags": ["binary search", "binary search on answer"],
+    "editorial": "Binary search po odpowiedzi. Funkcja ok(k) = 'czy przy prędkości k zje wszystko w h godzin' jest monotoniczna: większe k tylko pomaga. Sprawdzenie: suma ceil(pile / k) po wszystkich stosach <= h, koszt O(N). Szukamy najmniejszego k w [1, max(piles)]. O(N log max). Pułapki: ceil w intach to (pile + k - 1) // k (w C++ uwaga dodatkowo na przepełnienie int — long long); szablon lo < hi z hi = mid wymaga mid zaokrąglanego w dół.",
+    "code": "def min_eating_speed(piles: list[int], h: int) -> int:\n    def hours_needed(k: int) -> int:\n        # ceil(p / k) bez floatow\n        return sum((p + k - 1) // k for p in piles)\n\n    lo, hi = 1, max(piles)\n    while lo < hi:\n        mid = (lo + hi) // 2  # zaokraglenie w dol pasuje do hi = mid\n        if hours_needed(mid) <= h:\n            hi = mid\n        else:\n            lo = mid + 1\n    return lo",
+    "code_language": "python"
+  },
+  {
+    "title": "Number of Islands",
+    "source": "LeetCode 200",
+    "difficulty": "medium",
+    "tags": ["graph", "bfs", "dfs", "grid"],
+    "editorial": "Zliczanie spójnych składowych w siatce. Dla każdej nieodwiedzonej jedynki uruchamiamy BFS/DFS zalewający całą wyspę i zwiększamy licznik. O(N*M) — każda komórka odwiedzona raz. Pułapki: rekurencyjny DFS na siatce 300x300 może przepełnić stos w Pythonie (użyj BFS lub jawnego stosu); oznaczaj komórkę jako odwiedzoną przy WKŁADANIU do kolejki, nie przy zdejmowaniu (inaczej duplikaty rozdmuchują kolejkę); pilnuj granic siatki.",
+    "code": "def num_islands(grid: list[list[str]]) -> int:\n    from collections import deque\n    if not grid:\n        return 0\n    rows, cols = len(grid), len(grid[0])\n    count = 0\n    for r in range(rows):\n        for c in range(cols):\n            if grid[r][c] != '1':\n                continue\n            count += 1\n            grid[r][c] = '0'  # oznaczamy przy wkladaniu\n            q = deque([(r, c)])\n            while q:\n                y, x = q.popleft()\n                for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n                    ny, nx = y + dy, x + dx\n                    if 0 <= ny < rows and 0 <= nx < cols and grid[ny][nx] == '1':\n                        grid[ny][nx] = '0'\n                        q.append((ny, nx))\n    return count",
+    "code_language": "python"
+  },
+  {
+    "title": "Course Schedule",
+    "source": "LeetCode 207",
+    "difficulty": "medium",
+    "tags": ["graph", "topological sort", "cycle detection"],
+    "editorial": "Wykrywanie cyklu w grafie skierowanym = sortowanie topologiczne. Algorytm Kahna: policz stopnie wejściowe, wrzuć do kolejki wierzchołki o stopniu 0, zdejmuj i zmniejszaj stopnie sąsiadów. Jeśli przetworzono mniej niż N wierzchołków — istnieje cykl. O(V+E). Alternatywa: DFS z trzema kolorami (biały/szary/czarny), krawędź do szarego = cykl. Pułapki: kierunek krawędzi (prerekwizyt -> kurs), wierzchołki izolowane też muszą trafić do porządku, pary mogą się powtarzać w wejściu.",
+    "code": "def can_finish(num_courses: int, prerequisites: list[list[int]]) -> bool:\n    from collections import deque\n    adj: list[list[int]] = [[] for _ in range(num_courses)]\n    indeg = [0] * num_courses\n    for course, pre in prerequisites:\n        adj[pre].append(course)\n        indeg[course] += 1\n    q = deque(i for i in range(num_courses) if indeg[i] == 0)\n    seen = 0\n    while q:\n        u = q.popleft()\n        seen += 1\n        for v in adj[u]:\n            indeg[v] -= 1\n            if indeg[v] == 0:\n                q.append(v)\n    return seen == num_courses",
+    "code_language": "python"
+  },
+  {
+    "title": "Network Delay Time",
+    "source": "LeetCode 743",
+    "difficulty": "medium",
+    "tags": ["graph", "dijkstra", "shortest path"],
+    "editorial": "Najkrótsze ścieżki z jednego źródła, wagi nieujemne — Dijkstra z kopcem, O(E log V). Leniwa implementacja: do kopca trafiają pary (dystans, wierzchołek), przestarzałe wpisy pomijamy sprawdzeniem d > dist[u]. Wynik to maksimum z dystansów; jeśli któryś wierzchołek nieosiągalny — zwróć -1. Pułapki: BRAK sprawdzenia przestarzałych wpisów prowadzi do TLE na gęstych grafach; INF musi przewyższać maksymalną możliwą sumę wag; wierzchołki numerowane od 1.",
+    "code": "def network_delay_time(times: list[list[int]], n: int, k: int) -> int:\n    import heapq\n    adj: list[list[tuple[int, int]]] = [[] for _ in range(n + 1)]\n    for u, v, w in times:\n        adj[u].append((v, w))\n    INF = float('inf')\n    dist = [INF] * (n + 1)\n    dist[k] = 0\n    pq: list[tuple[int, int]] = [(0, k)]\n    while pq:\n        d, u = heapq.heappop(pq)\n        if d > dist[u]:\n            continue  # przestarzaly wpis\n        for v, w in adj[u]:\n            if d + w < dist[v]:\n                dist[v] = d + w\n                heapq.heappush(pq, (dist[v], v))\n    worst = max(dist[1:])\n    return -1 if worst == INF else int(worst)",
+    "code_language": "python"
+  },
+  {
+    "title": "Largest Rectangle in Histogram",
+    "source": "LeetCode 84",
+    "difficulty": "hard",
+    "tags": ["monotonic stack", "array"],
+    "editorial": "Dla każdego słupka szukamy najbliższego niższego z lewej i z prawej — szerokość maksymalnego prostokąta o wysokości tego słupka. Stos monotoniczny rosnący: gdy wchodzący słupek jest niższy od szczytu stosu, zdejmowany słupek ma wyznaczone obie granice (prawą — bieżący indeks, lewą — nowy szczyt stosu). Wartownik 0 na końcu opróżnia stos. O(N). Pułapki: szerokość po opróżnieniu stosu to i (nie i - stack[-1]); duplikaty wysokości działają poprawnie przy nierówności ostrej/nieostrej w jedną stronę; w C++ iloczyn wysokość * szerokość może wymagać long long.",
+    "code": "def largest_rectangle_area(heights: list[int]) -> int:\n    heights = heights + [0]  # wartownik oprozniajacy stos\n    stack: list[int] = []\n    best = 0\n    for i, h in enumerate(heights):\n        while stack and heights[stack[-1]] > h:\n            height = heights[stack.pop()]\n            width = i if not stack else i - stack[-1] - 1\n            best = max(best, height * width)\n        stack.append(i)\n    return best",
+    "code_language": "python"
+  },
+  {
+    "title": "Coin Change",
+    "source": "LeetCode 322",
+    "difficulty": "medium",
+    "tags": ["dynamic programming", "unbounded knapsack"],
+    "editorial": "Plecak nieograniczony: dp[a] = minimalna liczba monet dająca kwotę a. Przejście: dp[a] = min(dp[a - coin] + 1) po monetach. Iteracja kwot rosnąco pozwala używać monety wielokrotnie (odwrotnie niż w plecaku 0/1, gdzie iterujemy malejąco). O(kwota * liczba_monet). Pułapki: inicjalizacja INF i zwrócenie -1 gdy dp[amount] nieosiągalne; zachłanne branie największej monety NIE działa (monety 1, 3, 4 i kwota 6: zachłannie 4+1+1 = 3 monety, optymalnie 3+3 = 2); dp[0] = 0 to baza.",
+    "code": "def coin_change(coins: list[int], amount: int) -> int:\n    INF = amount + 1  # wiecej monet niz to niemozliwe\n    dp = [INF] * (amount + 1)\n    dp[0] = 0\n    for a in range(1, amount + 1):\n        for c in coins:\n            if c <= a and dp[a - c] + 1 < dp[a]:\n                dp[a] = dp[a - c] + 1\n    return dp[amount] if dp[amount] != INF else -1",
+    "code_language": "python"
+  },
+  {
+    "title": "Longest Increasing Subsequence",
+    "source": "LeetCode 300",
+    "difficulty": "medium",
+    "tags": ["dynamic programming", "binary search"],
+    "editorial": "DP O(N^2): dp[i] = długość LIS kończącego się na i. Optymalnie O(N log N): tablica tails, gdzie tails[k] = najmniejszy możliwy koniec rosnącego podciągu długości k+1; dla każdego x binary searchem (lower_bound) znajdujemy pierwszą pozycję >= x i podmieniamy (lub doklejamy na końcu). tails jest zawsze posortowane, ale NIE jest samym LIS — tylko jego długość jest poprawna. Pułapki: lower_bound (>=) dla ściśle rosnącego podciągu vs upper_bound (>) dla niemalejącego — pomylenie zmienia semantykę; odtworzenie samego ciągu wymaga dodatkowej tablicy poprzedników.",
+    "code": "def length_of_lis(nums: list[int]) -> int:\n    import bisect\n    tails: list[int] = []\n    for x in nums:\n        pos = bisect.bisect_left(tails, x)  # lower_bound: scisle rosnacy\n        if pos == len(tails):\n            tails.append(x)\n        else:\n            tails[pos] = x\n    return len(tails)",
+    "code_language": "python"
+  },
+  {
+    "title": "Assignment Problem (przydział zadań)",
+    "source": "klasyka / AtCoder practice",
+    "difficulty": "hard",
+    "tags": ["hungarian algorithm", "bipartite matching", "graph"],
+    "editorial": "N pracowników, N zadań, macierz kosztów; minimalizujemy sumę kosztów doskonałego przydziału. Brute force O(N!) odpada. Algorytm węgierski w O(N^3): utrzymujemy potencjały u, v dla wierszy i kolumn (niezmiennik u[i] + v[j] <= cost[i][j]) i budujemy skojarzenie po krawędziach ścisłych (równość); gdy nie ma ścieżki powiększającej, poprawiamy potencjały o minimalną deltę. Dla N <= 20 alternatywa: DP na bitmaskach O(2^N * N). Pułapki: implementacja potencjałów z indeksowaniem od 1 i kolumną-strażnikiem; maksymalizacja zamiast minimalizacji wymaga negacji kosztów; macierz niekwadratowa — dopełnij zerami.",
+    "code": "def hungarian(cost: list[list[int]]) -> int:\n    \"\"\"Minimalny koszt przydzialu, macierz n x n, O(n^3). Indeksowanie od 1.\"\"\"\n    n = len(cost)\n    INF = float('inf')\n    u = [0] * (n + 1)\n    v = [0] * (n + 1)\n    p = [0] * (n + 1)    # p[j] = wiersz skojarzony z kolumna j\n    way = [0] * (n + 1)\n    for i in range(1, n + 1):\n        p[0] = i\n        j0 = 0\n        minv = [INF] * (n + 1)\n        used = [False] * (n + 1)\n        while True:\n            used[j0] = True\n            i0, delta, j1 = p[j0], INF, -1\n            for j in range(1, n + 1):\n                if used[j]:\n                    continue\n                cur = cost[i0 - 1][j - 1] - u[i0] - v[j]\n                if cur < minv[j]:\n                    minv[j], way[j] = cur, j0\n                if minv[j] < delta:\n                    delta, j1 = minv[j], j\n            for j in range(n + 1):\n                if used[j]:\n                    u[p[j]] += delta\n                    v[j] -= delta\n                else:\n                    minv[j] -= delta\n            j0 = j1\n            if p[j0] == 0:\n                break\n        while j0:  # odtworzenie sciezki powiekszajacej\n            j1 = way[j0]\n            p[j0] = p[j1]\n            j0 = j1\n    return sum(cost[p[j] - 1][j - 1] for j in range(1, n + 1))",
+    "code_language": "python"
+  },
+  {
+    "title": "Maximum Subarray (Kadane)",
+    "source": "LeetCode 53",
+    "difficulty": "medium",
+    "tags": ["dynamic programming", "array", "kadane"],
+    "editorial": "Algorytm Kadane: cur = max(x, cur + x) — albo przedłużamy podciąg, albo zaczynamy nowy od x; wynik to maksimum z cur. To DP z jednym stanem. O(N), O(1) pamięci. Pułapki: inicjalizacja wyniku zerem psuje przypadki z samymi ujemnymi (inicjalizuj pierwszym elementem lub -INF); zadanie wymaga podciągu NIEPUSTEGO; wariant kołowy (Maximum Sum Circular Subarray) = max(zwykły Kadane, suma - minimalny podciąg) z wyjątkiem samych ujemnych.",
+    "code": "def max_subarray(nums: list[int]) -> int:\n    best = cur = nums[0]  # niepusty podciag: start od pierwszego elementu\n    for x in nums[1:]:\n        cur = max(x, cur + x)\n        best = max(best, cur)\n    return best",
+    "code_language": "python"
+  },
+  {
+    "title": "Merge Intervals",
+    "source": "LeetCode 56",
+    "difficulty": "medium",
+    "tags": ["greedy", "sorting", "intervals"],
+    "editorial": "Sortujemy przedziały po początkach; przechodzimy liniowo, sklejając bieżący z ostatnim w wyniku, gdy start <= koniec ostatniego. O(N log N) przez sortowanie. Uwaga: pokrewne zadanie o maksymalnej liczbie rozłącznych przedziałów (activity selection) wymaga sortowania po KOŃCACH — pomylenie klucza sortowania to klasyczny błąd. Pułapki: przedziały stykające się ([1,4] i [4,5] — zwykle sklejamy), koniec sklejonego to max końców (nie koniec późniejszego przedziału!), pusta lista wejściowa.",
+    "code": "def merge_intervals(intervals: list[list[int]]) -> list[list[int]]:\n    intervals.sort(key=lambda it: it[0])\n    out: list[list[int]] = []\n    for start, end in intervals:\n        if out and start <= out[-1][1]:\n            out[-1][1] = max(out[-1][1], end)  # max, nie samo end\n        else:\n            out.append([start, end])\n    return out",
+    "code_language": "python"
+  },
+  {
+    "title": "Word Ladder",
+    "source": "LeetCode 127",
+    "difficulty": "hard",
+    "tags": ["graph", "bfs", "implicit graph"],
+    "editorial": "Modelowanie: słowa to wierzchołki, krawędź łączy słowa różniące się jedną literą — najkrótsza droga w grafie nieważonym = BFS. Generowanie sąsiadów przez podmianę każdej litery na a-z (26 * L na słowo) jest szybsze niż porównywanie wszystkich par O(N^2 * L). Optymalizacja: BFS dwukierunkowy zmniejsza przestrzeń wykładniczo. Pułapki: usuwaj słowa ze zbioru (oznaczaj odwiedzone) przy wkładaniu do kolejki; endWord może nie istnieć w słowniku — wynik 0; wynik liczony w liczbie SŁÓW na ścieżce, nie krawędzi.",
+    "code": "def ladder_length(begin_word: str, end_word: str, word_list: list[str]) -> int:\n    from collections import deque\n    words = set(word_list)\n    if end_word not in words:\n        return 0\n    q = deque([(begin_word, 1)])\n    words.discard(begin_word)\n    while q:\n        word, steps = q.popleft()\n        if word == end_word:\n            return steps\n        for i in range(len(word)):\n            for ch in 'abcdefghijklmnopqrstuvwxyz':\n                nxt = word[:i] + ch + word[i + 1:]\n                if nxt in words:\n                    words.remove(nxt)  # odwiedzone przy wkladaniu\n                    q.append((nxt, steps + 1))\n    return 0",
+    "code_language": "python"
+  }
+]

@@ -1,0 +1,92 @@
+[
+  {
+    "title": "Two Pointers (dwa wskaźniki)",
+    "kind": "concept",
+    "text": "Technika dwóch wskaźników polega na utrzymywaniu dwóch indeksów przesuwanych po tablicy lub liście, zwykle w przeciwnych kierunkach albo w tym samym kierunku z różną prędkością. Klasyczne zastosowania: para o zadanej sumie w posortowanej tablicy (lewy wskaźnik od początku, prawy od końca; jeśli suma za mała — przesuń lewy, jeśli za duża — prawy), usuwanie duplikatów in-place, scalanie posortowanych ciągów, problem pojemnika z wodą (Container With Most Water). Kluczowa własność: każdy wskaźnik przesuwa się łącznie co najwyżej N razy, więc złożoność to O(N) zamiast naiwnego O(N^2). Warunek stosowalności: monotoniczność — decyzja o przesunięciu wskaźnika musi być jednoznaczna (często wymaga wcześniejszego posortowania danych, co dodaje O(N log N)). Typowe błędy: pętla z warunkiem left <= right zamiast left < right prowadząca do podwójnego zliczenia środka, brak obsługi duplikatów."
+  },
+  {
+    "title": "Sliding Window (okno przesuwne)",
+    "kind": "concept",
+    "text": "Okno przesuwne to szczególny wariant dwóch wskaźników utrzymujący spójny podciąg (okno) spełniający pewien niezmiennik. Okno rozszerzamy prawym końcem, a gdy niezmiennik zostaje złamany, kurczymy lewym. Zastosowania: najdłuższy podciąg bez powtórzeń (Longest Substring Without Repeating Characters), minimalne okno zawierające wzorzec (Minimum Window Substring), maksymalna suma podciągu długości K, zliczanie podciągów o sumie mniejszej niż S. Warunek stosowalności: funkcja okna musi być monotoniczna względem rozszerzania/kurczenia (dodanie elementu nie może naprawić złamanego warunku). Dla wartości ujemnych w tablicy zwykłe okno przesuwne NIE działa — potrzebne sumy prefiksowe z hash mapą albo kolejka monotoniczna. Złożoność: O(N), bo każdy element wchodzi i wychodzi z okna raz. Typowe błędy: aktualizacja wyniku przed skurczeniem okna, złe zarządzanie licznikami znaków przy kurczeniu."
+  },
+  {
+    "title": "Programowanie dynamiczne (DP) — podstawy",
+    "kind": "concept",
+    "text": "Programowanie dynamiczne stosujemy, gdy problem ma podstrukturę optymalną (optymalne rozwiązanie składa się z optymalnych rozwiązań podproblemów) oraz nakładające się podproblemy. Proces projektowania: (1) zdefiniuj stan — co jednoznacznie opisuje podproblem, np. dp[i] = najlepszy wynik dla prefiksu długości i; (2) wyprowadź równanie przejścia; (3) ustal przypadki bazowe; (4) określ kolejność obliczeń (bottom-up) albo użyj memoizacji (top-down). Złożoność = liczba stanów × koszt przejścia. Klasyki: plecak (knapsack) O(N*W), najdłuższy wspólny podciąg LCS O(N*M), Edit Distance O(N*M), najdłuższy rosnący podciąg LIS O(N log N) z binary search, problem monet (coin change). Sygnały, że to DP: pytania o liczbę sposobów, minimum/maksimum kosztu, ograniczenia N do kilku tysięcy sugerujące O(N^2). Typowe błędy: zły porządek iteracji (nadpisywanie stanów, z których jeszcze korzystamy — w plecaku 0/1 iteruj wagi malejąco), pominięcie przypadku bazowego, off-by-one w indeksowaniu prefiksów."
+  },
+  {
+    "title": "DP na przedziałach i bitmaskach",
+    "kind": "concept",
+    "text": "DP przedziałowe: stan dp[l][r] opisuje optymalny wynik dla podciągu od l do r; przejście iteruje punkt podziału k między l i r, co daje O(N^3) — klasyki to Matrix Chain Multiplication, Burst Balloons, palindromy. Iterować należy po rosnącej długości przedziału. DP na bitmaskach: stan to podzbiór elementów zakodowany w liczbie (maska bitowa), np. dp[mask][i] = najkrótsza ścieżka odwiedzająca wierzchołki z mask i kończąca w i (problem komiwojażera TSP, O(2^N * N^2), wykonalne dla N <= 20). Sygnał: bardzo małe N (<= 20) w treści zadania niemal zawsze oznacza bitmaski lub przeszukiwanie wykładnicze. Typowe błędy: iterowanie masek w złej kolejności, mylenie znaczenia bitu ustawionego (odwiedzony vs nieodwiedzony)."
+  },
+  {
+    "title": "Wyszukiwanie binarne i binary search po odpowiedzi",
+    "kind": "concept",
+    "text": "Wyszukiwanie binarne wymaga monotoniczności przestrzeni przeszukiwania. Poza szukaniem elementu w posortowanej tablicy najważniejszy wariant konkursowy to binary search po odpowiedzi: jeśli funkcja 'czy da się osiągnąć wynik x' jest monotoniczna (da się dla x, to da się też dla x-1), szukamy binarnie granicznego x, a sprawdzenie wykonujemy zachłannie lub symulacją. Przykłady: minimalna maksymalna liczba stron przy podziale książek, Koko jedząca banany, maksymalna minimalna odległość. Złożoność: O(log(zakres) * koszt_sprawdzenia). Poprawny szablon: lo, hi; while lo < hi: mid = (lo+hi)//2; if ok(mid): hi = mid else lo = mid+1. Typowe błędy: nieskończona pętla przy mid = (lo+hi+1)//2 vs hi = mid-1 (niedopasowanie zaokrąglenia do kierunku), przepełnienie (lo+hi) w C++ dla dużych zakresów — używaj lo + (hi-lo)/2, błędne warunki brzegowe gdy odpowiedź nie istnieje."
+  },
+  {
+    "title": "Grafy — BFS, DFS, sortowanie topologiczne",
+    "kind": "concept",
+    "text": "BFS znajduje najkrótsze ścieżki w grafie nieważonym w O(V+E); używa kolejki i tablicy odwiedzin — odwiedzone oznaczaj PRZY WKŁADANIU do kolejki, nie przy zdejmowaniu (inaczej duplikaty w kolejce mogą dać złożoność wykładniczą pamięciowo). DFS służy do wykrywania cykli, spójnych składowych, mostów i punktów artykulacji; w wersji rekurencyjnej uważaj na limit stosu (w Pythonie sys.setrecursionlimit lub wersja iteracyjna dla N > ~10^4). Sortowanie topologiczne (algorytm Kahna z licznikami stopni wejściowych lub DFS z odwróconym porządkiem post-order) działa tylko na DAG-ach; jeśli po przetworzeniu zostały wierzchołki, graf ma cykl. Modelowanie: wiele zadań pozornie nie-grafowych (stany gry, przelewanie wody, zamki i klucze) sprowadza się do BFS po przestrzeni stanów. Typowe błędy: brak tablicy visited (nieskończona pętla), traktowanie grafu skierowanego jak nieskierowanego, pominięcie wierzchołków izolowanych, zły start przy wielu składowych."
+  },
+  {
+    "title": "Najkrótsze ścieżki — Dijkstra, Bellman-Ford, Floyd-Warshall",
+    "kind": "concept",
+    "text": "Dijkstra: najkrótsze ścieżki z jednego źródła przy NIEUJEMNYCH wagach, O((V+E) log V) z kopcem. Implementacja leniwa: wkładaj pary (dystans, wierzchołek) do kopca i pomijaj przestarzałe wpisy (if d > dist[u]: continue) — brak tego sprawdzenia to częsta przyczyna TLE. Bellman-Ford: dopuszcza wagi ujemne, O(V*E), wykrywa cykle ujemne (relaksacja w V-tej iteracji). Floyd-Warshall: wszystkie pary, O(V^3), sensowne dla V <= 500; kolejność pętli k-i-j jest obowiązkowa (k najbardziej zewnętrzne). 0-1 BFS z deque dla wag {0,1} w O(V+E). Typowe błędy: Dijkstra z ujemnymi wagami (cicho daje złe wyniki), przepełnienie int przy sumowaniu dystansów (INF + waga), inicjalizacja INF zbyt mała."
+  },
+  {
+    "title": "Struktury danych — kopiec, DSU, drzewo Fenwicka, drzewo przedziałowe",
+    "kind": "concept",
+    "text": "Kopiec (priority queue): wstawianie i zdejmowanie minimum w O(log N); zadania typu 'K największych', scalanie K list, mediana strumienia (dwa kopce). DSU / Union-Find: dynamiczne łączenie zbiorów w prawie O(1) (kompresja ścieżek + łączenie według rangi); zastosowania: Kruskal MST, spójność online, wykrywanie cykli w grafie nieskierowanym. Drzewo Fenwicka (BIT): sumy prefiksowe z aktualizacjami punktowymi w O(log N), krótki kod, indeksowanie od 1; klasyka: zliczanie inwersji. Drzewo przedziałowe (segment tree): dowolna łączna operacja (min, max, suma, gcd) na przedziale z aktualizacjami w O(log N); wersja z lazy propagation obsługuje aktualizacje przedziałowe. Wybór: gdy wystarczy suma prefiksowa — Fenwick (prostszy); gdy potrzebne min/max lub lazy — segment tree. Typowe błędy: zapomniana kompresja ścieżek w DSU (degeneracja do O(N)), off-by-one w indeksowaniu Fenwicka od 1."
+  },
+  {
+    "title": "Algorytmy zachłanne i dowodzenie poprawności",
+    "kind": "concept",
+    "text": "Algorytm zachłanny podejmuje lokalnie optymalne decyzje. Poprawność wymaga dowodu — najczęściej argument wymiany (exchange argument): pokazujemy, że dowolne optymalne rozwiązanie można przekształcić do zachłannego bez pogorszenia wyniku. Klasyki: wybór maksymalnej liczby rozłącznych przedziałów (sortuj po KOŃCACH, nie początkach!), kodowanie Huffmana, tankowanie na trasie, przydział zadań do maszyn. Sygnały, że zachłanny może nie działać: przykład, gdzie lokalny wybór blokuje lepszy globalny — wtedy DP. Częsty schemat: posortuj po sprytnie dobranym kluczu, potem jeden przebieg z kopcem lub bez. Typowe błędy: sortowanie po złym kluczu (przedziały po początkach zamiast końców), brak kontrprzykładu przed uwierzeniem w poprawność."
+  },
+  {
+    "title": "Sumy prefiksowe i hash mapy w zadaniach o podciągach",
+    "kind": "concept",
+    "text": "Suma podciągu [l, r] = prefix[r] - prefix[l-1]. Zadanie 'liczba podciągów o sumie K' (Subarray Sum Equals K): idąc od lewej trzymaj w hash mapie liczność każdej dotychczasowej sumy prefiksowej; dla bieżącej sumy S dodaj do wyniku licznik wystąpień S-K. Działa z liczbami ujemnymi (w przeciwieństwie do sliding window). Warianty: podciąg o sumie podzielnej przez K (przechowuj reszty modulo, uwaga na ujemne reszty w C++), najdłuższy podciąg o równej liczbie zer i jedynek (zamień 0 na -1). Sumy prefiksowe 2D dla zapytań o prostokąty: pre[i][j] z zasadą włączeń-wyłączeń. Typowe błędy: brak inicjalizacji mapy wpisem {0: 1} (podciągi zaczynające się od indeksu 0), pomylenie 'liczba podciągów' z 'najdłuższy podciąg' (wtedy w mapie trzymamy pierwszy indeks, nie licznik)."
+  },
+  {
+    "title": "Analiza złożoności i limity czasowe (TLE)",
+    "kind": "concept",
+    "text": "Praktyczna reguła: około 10^8 prostych operacji na sekundę (C++), 10^6-10^7 dla Pythona. Odczytuj ograniczenia zadania: N <= 10^5 dopuszcza O(N log N), N <= 10^3 dopuszcza O(N^2), N <= 100 dopuszcza O(N^3), N <= 20 sugeruje O(2^N). Jeśli rozwiązanie O(N^2) dostaje TLE przy N = 10^5, szukaj podejścia O(N log N): sortowanie + dwa wskaźniki, struktura danych (kopiec, BIT), binary search po odpowiedzi. Ukryte koszty: operacje na stringach (konkatenacja w pętli to O(N^2) w Pythonie i Javie), kopiowanie kontenerów przekazywanych przez wartość w C++ (używaj referencji), wbudowane funkcje jak count/index wewnątrz pętli, logarytmiczny koszt map/set w C++ tam, gdzie wystarczy unordered_map. Złożoność pamięciowa też bywa limitem: tablica 10^5 x 10^5 się nie zmieści — potrzebna optymalizacja stanu DP do jednego wymiaru."
+  },
+  {
+    "title": "Typowe błędy: off-by-one, przepełnienie int, warunki brzegowe",
+    "kind": "concept",
+    "text": "Off-by-one: pętla for i in range(n) vs range(n+1), warunek i < n vs i <= n, przedziały domknięte vs półotwarte — konsekwentnie używaj półotwartych [l, r). Przepełnienie typu: w C++ int mieści ~2.1 * 10^9; iloczyn dwóch liczb rzędu 10^5 przekracza zakres — rzutuj na long long PRZED mnożeniem (1LL * a * b), nie po. Suma N elementów po 10^9 każdy również wymaga long long. W Pythonie liczby są dowolnej precyzji, ale za to łatwiej o TLE. Warunki brzegowe do sprawdzenia zawsze: puste wejście, jeden element, wszystkie elementy równe, wartości minimalne/maksymalne z ograniczeń, brak rozwiązania (co zwrócić?). Wrong Answer 'na dużych testach' przy poprawnych małych to klasyczny sygnał przepełnienia int lub degeneracji wydajnościowej, a nie błędu logiki. Porównania float: nigdy ==, zawsze abs(a-b) < eps. Modulo ujemnych liczb w C++ daje wynik ujemny — normalizuj ((x % m) + m) % m."
+  },
+  {
+    "title": "Backtracking i przeszukiwanie z obcinaniem",
+    "kind": "concept",
+    "text": "Backtracking systematycznie buduje rozwiązanie kandydackie i wycofuje się, gdy nie może być rozszerzone do poprawnego. Klasyki: N-hetmanów, generowanie permutacji/podzbiorów, Sudoku, podział na k podzbiorów o równych sumach. Klucz do wydajności — obcinanie (pruning): sortowanie malejące danych wejściowych, pomijanie duplikatów na tym samym poziomie rekursji (if i > start and a[i] == a[i-1]: continue), wczesne przerywanie gdy suma częściowa przekracza cel, ograniczenia symetrii. Złożoność wykładnicza z natury — stosuj gdy N małe (<= ~20) lub gdy obcinanie drastycznie redukuje drzewo. Typowe błędy: brak cofnięcia zmiany stanu po powrocie z rekursji (mutacja współdzielonej listy), duplikaty w wynikach przy powtarzających się elementach."
+  },
+  {
+    "title": "Kolejka monotoniczna i stos monotoniczny",
+    "kind": "concept",
+    "text": "Stos monotoniczny utrzymuje elementy rosnąco lub malejąco i służy do pytań 'najbliższy większy/mniejszy element z lewej/prawej' w O(N): idąc po tablicy zdejmuj ze stosu elementy łamiące monotoniczność — każdy element wchodzi i schodzi raz. Klasyki: Largest Rectangle in Histogram, Daily Temperatures, Trapping Rain Water (wariant), Next Greater Element. Kolejka monotoniczna (deque) rozwiązuje maksimum w oknie przesuwnym długości K w O(N): z przodu usuwaj elementy poza oknem, z tyłu usuwaj mniejsze od wchodzącego. Zastosowanie w optymalizacji DP: dp[i] = max(dp[j] dla j w oknie) + coś. Typowe błędy: mylenie indeksów z wartościami w deque, zły kierunek nierówności (maksimum vs minimum), zapomnienie o opróżnieniu stosu na końcu (element wartowniczy upraszcza kod)."
+  },
+  {
+    "title": "Hashowanie stringów i algorytmy tekstowe",
+    "kind": "concept",
+    "text": "KMP znajduje wzorzec w tekście w O(N+M) dzięki funkcji prefiksowej (najdłuższy właściwy prefiks będący sufiksem). Rolling hash / Rabin-Karp: hash podciągu w O(1) po prefiksowym przeliczeniu, porównywanie podciągów bez ich czytania; podwójne hashowanie (dwa moduły) redukuje ryzyko kolizji na testach anty-hashowych. Z-funkcja: alternatywa dla funkcji prefiksowej. Trie: słownik prefiksowy do zadań z XOR (maksymalny XOR pary — trie bitowe) i autouzupełniania. Palindromy: algorytm Manachera w O(N) lub DP O(N^2). Typowe błędy: hash pojedynczy modulo 2^64 łamany testami, porównywanie hashy bez weryfikacji przy krytycznych zastosowaniach, budowanie stringów przez konkatenację w pętli (O(N^2))."
+  },
+  {
+    "title": "Algorytm węgierski i skojarzenia w grafach dwudzielnych",
+    "kind": "concept",
+    "text": "Maksymalne skojarzenie w grafie dwudzielnym: algorytm Hopcrofta-Karpa O(E*sqrt(V)) lub prostszy algorytm ścieżek powiększających (Kuhna) O(V*E). Ścieżka powiększająca naprzemiennie przechodzi krawędzie poza i w skojarzeniu; znalezienie jej pozwala powiększyć skojarzenie o 1. Algorytm węgierski rozwiązuje problem PRZYDZIAŁU z wagami (assignment problem): minimalizacja kosztu doskonałego skojarzenia w O(N^3) — macierz kosztów, redukcje wierszy/kolumn, pokrycia zerami. Zastosowania: przydział pracowników do zadań, minimalizacja sumy odległości par. Twierdzenie Königa: w grafie dwudzielnym rozmiar maksymalnego skojarzenia = rozmiar minimalnego pokrycia wierzchołkowego. Modelowanie: zadania o parowaniu dwóch grup obiektów z kosztami niemal zawsze sprowadzają się do skojarzeń lub przepływów. Typowe błędy: użycie algorytmu Kuhna bez czyszczenia tablicy visited między wierzchołkami startowymi, próba stosowania na grafie niedwudzielnym."
+  },
+  {
+    "title": "Przepływy w sieciach — max flow / min cut",
+    "kind": "concept",
+    "text": "Maksymalny przepływ: Edmonds-Karp (BFS po ścieżkach powiększających) O(V*E^2), Dinic O(V^2*E) — w praktyce bardzo szybki, dla grafów jednostkowych O(E*sqrt(V)). Twierdzenie max-flow min-cut: wartość maksymalnego przepływu = pojemność minimalnego przekroju. Modelowanie to główna trudność: skojarzenia dwudzielne (źródło -> lewa strona -> prawa -> ujście, pojemności 1), projekty i wymagania (project selection / min cut), wierzchołki z pojemnościami (rozdziel wierzchołek na wejściowy i wyjściowy). Sygnał: zadanie o 'maksymalnej liczbie rozłącznych ścieżek' albo 'minimalnym koszcie rozdzielenia' to często przepływ. Typowe błędy: zapomniane krawędzie wsteczne (residualne), przepełnienie int przy dużych pojemnościach, zbyt wolny algorytm dla dużych grafów."
+  },
+  {
+    "title": "Matematyka konkursowa — NWD, potęgowanie modularne, kombinatoryka",
+    "kind": "concept",
+    "text": "NWD: algorytm Euklidesa O(log min(a,b)); NWW = a / NWD * b (dziel przed mnożeniem — przepełnienie!). Szybkie potęgowanie modularne O(log n): kwadratowanie z redukcją modulo na każdym kroku. Odwrotność modularna: potęgowanie a^(m-2) mod m dla m pierwszego (małe twierdzenie Fermata) lub rozszerzony Euklides. Kombinatoryka: prekomputuj silnie i odwrotności silni, C(n,k) = fact[n] * inv_fact[k] * inv_fact[n-k] mod p. Sito Eratostenesa O(N log log N); faktoryzacja przez najmniejszy dzielnik pierwszy (SPF) pozwala rozkładać liczby w O(log N) po prekomputacji. Typowe błędy: modulo po każdej operacji (zapomnienie przy odejmowaniu daje wynik ujemny: dodaj +MOD), przepełnienie przy mnożeniu dwóch liczb ~10^9 przed redukcją (w C++ rzutuj na long long / __int128), mylenie permutacji z kombinacjami."
+  }
+]
